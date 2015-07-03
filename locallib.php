@@ -423,8 +423,14 @@ function report_coursequotas_getTempUsage() {
 
 function report_coursequotas_getTrashUsage() {
     global $CFG;
-    if (file_exists($CFG->dataroot . '/trashdir/')) {
-        $tempSize = exec('du -sk ' . $CFG->dataroot . '/trashdir/');
+    if (isset($CFG->trashdir)) {
+        $trashdirdir = $CFG->trashdir;
+    } else {
+        $trashdirdir = $CFG->dataroot.'/trashdir';
+    }
+    $trashdirdir .= '/';
+    if (file_exists($trashdirdir)) {
+        $tempSize = exec('du -sk ' . $trashdirdir);
         $tempSize = explode('/', $tempSize);
         $tempSize = $tempSize[0]; // Size in kB
         return $tempSize * 1024;
