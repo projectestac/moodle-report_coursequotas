@@ -69,13 +69,6 @@ $c = new stdClass();
 $c->figure = number_format($size['figure'], 1, ',', '.');
 $c->unit = $size['unit'];
 
-$userSize = report_coursequotas_getUserUsage();
-$disaggregated['user'] = $userSize;
-$userSize = report_coursequotas_formatSize($userSize);
-$g = new stdClass();
-$g->figure = number_format($userSize['figure'], 1, ',', '.');
-$g->unit = $userSize['unit'];
-
 // Get quota used in backups
 $backupSize = report_coursequotas_getBackupUsage();
 $disaggregated['backup'] = $backupSize;
@@ -83,6 +76,14 @@ $backupUsage = report_coursequotas_formatSize($backupSize);
 $d = new stdClass();
 $d->figure = number_format($backupUsage['figure'], 1, ',', '.');
 $d->unit = $backupUsage['unit'];
+
+// Get quota used by users
+$userSize = report_coursequotas_getUserUsage();
+$disaggregated['user'] = $userSize;
+$userSize = report_coursequotas_formatSize($userSize);
+$g = new stdClass();
+$g->figure = number_format($userSize['figure'], 1, ',', '.');
+$g->unit = $userSize['unit'];
 
 // Get quota used in files in moodledata/temp/ and in moodledata/trashdir/
 $tempSize = report_coursequotas_getTempUsage();

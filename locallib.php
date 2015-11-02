@@ -413,8 +413,7 @@ function report_coursequotas_getBackupUsage() {
 function report_coursequotas_getUserUsage() {
     global $DB;
 
-    // component equal to backup means "course level backup"
-    // filearea equal to backup means "user level backup" which is not associated to any course
+    // User files excluding backups
     $sql = "SELECT sum(filesize) AS total
             FROM {files}
             WHERE component='user' AND filearea != 'backup' AND filename != '.'";
@@ -501,26 +500,35 @@ function report_coursequotas_formatSize($figure) {
 }
 
 function report_coursequotas_printChart($disaggregated, $consumed = false, $total = false){
-    //return '<p style="text-align:center; margin-bottom:20px;"><img src="graph.php?diskSpace=' . $total . '&diskConsume=' . $consumed . '" /></p>';
     global $CFG;
 
-    if($total){
+    $consumed_calc = 0;
+    foreach($disaggregated as $type => $value){
+        $consumed_calc += $value / (1024*1024);
+    }
+
+    if ($consumed && $total) {
         $free = $total - $consumed;
         // Protect the graph against data errors
         if ($free < 0)  $free = 0;
 
         $consumed_percent = (int) ($consumed/$total *100);
         $free_percent = (int) ($free/$total *100);
+
+        if (is_xtecadmin()) {
+            $diff_calc = (int) ($consumed - $consumed_calc);
+            if ($diff_calc != 0) {
+                echo "Hi ha $diff_calc MB que s'escapen...";
+            }
+        }
     } else {
         $free = 0;
         $free_percent = 0;
-        $consumed = 0;
-        foreach($disaggregated as $type => $value){
-            $consumed += $value / (1024*1024);
-        }
-        $total = $consumed;
+
+        $total = $consumed = $consumed_calc;
         $consumed_percent = 100;
     }
+
     $colors = array('course' =>'#FDB45C', 'backup' => '#46BFBD', 'user' => '#4C86B9', 'temp' => '#984298','trash' => '#A4822D', 'repo' => '#BB556F');
     $highlights = array('course' =>'#FFC870', 'backup' => '#5AD3D1', 'user' => '#5B90BF', 'temp' => '#D19ED1','trash' => '#C79E37', 'repo' => '#DF6A88');
     $text = '<script src="'.$CFG->wwwroot.'/report/coursequotas/chartjs/Chart.min.js"></script>';
