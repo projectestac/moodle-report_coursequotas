@@ -410,6 +410,18 @@ function report_coursequotas_getBackupUsage() {
     return $size ? $size : 0;
 }
 
+function report_coursequotas_getUserUsage() {
+    global $DB;
+
+    // component equal to backup means "course level backup"
+    // filearea equal to backup means "user level backup" which is not associated to any course
+    $sql = "SELECT sum(filesize) AS total
+            FROM {files}
+            WHERE component='user' AND filearea != 'backup' AND filename != '.'";
+    $size = $DB->get_record_sql($sql, null)->total;
+    return $size ? $size : 0;
+}
+
 function report_coursequotas_getTempUsage() {
     global $CFG;
     if (isset($CFG->tempdir)) {
@@ -509,8 +521,8 @@ function report_coursequotas_printChart($disaggregated, $consumed = false, $tota
         $total = $consumed;
         $consumed_percent = 100;
     }
-    $colors = array('course' =>'#FDB45C', 'backup' => '#46BFBD', 'temp' => '#984298','trash' => '#A4822D', 'repo' => '#BB556F');
-    $highlights = array('course' =>'#FFC870', 'backup' => '#5AD3D1', 'temp' => '#D19ED1','trash' => '#C79E37', 'repo' => '#DF6A88');
+    $colors = array('course' =>'#FDB45C', 'backup' => '#46BFBD', 'user' => '#4C86B9', 'temp' => '#984298','trash' => '#A4822D', 'repo' => '#BB556F');
+    $highlights = array('course' =>'#FFC870', 'backup' => '#5AD3D1', 'user' => '#5B90BF', 'temp' => '#D19ED1','trash' => '#C79E37', 'repo' => '#DF6A88');
     $text = '<script src="'.$CFG->wwwroot.'/report/coursequotas/chartjs/Chart.min.js"></script>';
     $text .= '<div id="canvas-holder" style="text-align:center;"><canvas id="chart-area" width="300" height="300"/></div>';
     $text .= '<script>
