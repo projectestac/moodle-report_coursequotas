@@ -445,11 +445,12 @@ function report_coursequotas_getTrashUsage() {
 
 function report_coursequotas_getRepositoryUsage() {
     global $CFG;
-    if (file_exists($CFG->dataroot . '/repository/files/')) {
-            $repoSize = exec('du -sk ' . $CFG->dataroot . '/repository/files/');
-            $repoSize = explode('/', $repoSize);
-            $repoSize = $repoSize[0]; // Size in kB
-            $size = $repoSize * 1024;
+    if (file_exists($CFG->dataroot . '/repository/')) {
+        $repoSize = exec('du -sk ' . $CFG->dataroot . '/repository/');
+        $repoSize = explode('/', $repoSize);
+        $repoSize = $repoSize[0]; // Size in kB
+        $size = $repoSize * 1024;
+        return $size;
     }
     return 0;
 }
