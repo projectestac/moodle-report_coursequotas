@@ -26,7 +26,7 @@ $string['disk_consume_backups'] = '<strong>{$a->figure} {$a->unit}</strong> util
 $string['disk_consume_user'] = '<strong>{$a->figure} {$a->unit}</strong> utilizados en archivos de usuario';
 $string['disk_consume_temp'] = '<strong>{$a->figure} {$a->unit}</strong> utilizados en la carpeta <em>temp</em> (ficheros temporales pendientes de ser borrados por el cron)';
 $string['disk_consume_trash'] = '<strong>{$a->figure} {$a->unit}</strong> utilizados en la carpeta <em>trashdir</em> (ficheros marcados como borrados y pendientes de ser borrados por el cron)';
-$string['total_description'] = 'A continuación se muestra el porcentaje de cuota de disco ocupado en relación con el total';
+$string['total_description'] = 'A continuación se muestra el porcentaje de cuota de disco ocupado en relación con al total';
 $string['category_description'] = 'A continuación se muestran los cursos de las diferentes categorias junto con el tamaño total de los ficheros que lo componen';
 $string['courses_description'] = 'A continuación se muestran todos los cursos junto con su categoría y el tamaño de sus ficheros ordenados de mayor a menor según este último dato';
 
