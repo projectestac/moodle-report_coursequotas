@@ -150,13 +150,7 @@ function report_coursequotas_addContextElemsToTree($categoryTree, $systemContext
             $courseId = $dbRecord->instanceid;
 
             // Calculate size of all the files inside the front page avoiding duplicates
-            $sql = "SELECT sum(total) as total FROM (
-                           SELECT DISTINCT f.contenthash, f.filesize as total
-                           FROM {context} c, {files} f
-                           WHERE f.contextid=c.id AND c.path like '" . $path . "%'
-                    ) t";
-            $totalSize = $DB->get_record_sql($sql)->total;
-
+            $totalSize = get_coursequotas_filesize("f.contextid=c.id AND c.path like '" . $path . "%'", "{context} c");
             $categoryTree['0']['categorysize'] = $totalSize;
             $categoryTree['0']['courses'][$courseId]['coursesize'] = $totalSize;
         }
@@ -177,15 +171,9 @@ function report_coursequotas_addContextElemsToTree($categoryTree, $systemContext
                 $courseId = $record->instanceid;
 
                 // Calculate size of all the files inside the course avoiding duplicates
-                $sql = "SELECT sum(total) as total FROM (
-                               SELECT DISTINCT f.contenthash, f.filesize as total
-                               FROM {context} c, {files} f
-                               WHERE f.contextid=c.id AND c.path like '" . $coursePath . "/%'
-                        ) t";
-                $courseSize = $DB->get_record_sql($sql);
-
-                $totalCourseSize = $courseSize->total;
-                $totalSize += $courseSize->total;
+                $courseSize = get_coursequotas_filesize("f.contextid=c.id AND c.path like '" . $coursePath . "/%'", "{context} c");
+                $totalCourseSize = $courseSize;
+                $totalSize += $courseSize;
 
                 $categoryTree[$key]['courses'][$courseId]['coursesize'] = $totalCourseSize;
             }
@@ -398,27 +386,14 @@ function report_coursequotas_getCoursesDataBody($data) {
  * @return int Number of bytes used
  */
 function report_coursequotas_getBackupUsage() {
-
-    global $DB;
-
     // component equal to backup means "course level backup"
     // filearea equal to backup means "user level backup" which is not associated to any course
-    $sql = "SELECT sum(filesize) AS total
-            FROM {files}
-            WHERE (component='backup' or filearea='backup') AND filename != '.'";
-    $size = $DB->get_record_sql($sql, null)->total;
-    return $size ? $size : 0;
+    return get_coursequotas_filesize("(component='backup' or filearea='backup') AND filename != '.'");
 }
 
 function report_coursequotas_getUserUsage() {
-    global $DB;
-
     // User files excluding backups
-    $sql = "SELECT sum(filesize) AS total
-            FROM {files}
-            WHERE component='user' AND filearea != 'backup' AND filename != '.'";
-    $size = $DB->get_record_sql($sql, null)->total;
-    return $size ? $size : 0;
+    return get_coursequotas_filesize("component='user' AND filearea != 'backup' AND filename != '.'");
 }
 
 function report_coursequotas_getTempUsage() {
@@ -568,4 +543,20 @@ function report_coursequotas_printChart($disaggregated, $consumed = false, $tota
         };
     </script>';
     return $text;
+}
+
+
+function get_coursequotas_filesize($where = "", $tables = "") {
+    global $DB;
+
+    if (!empty($tables)) {
+        $tables = ', '.$tables;
+    }
+    if (!empty($where)) {
+        $where = 'WHERE '.$where;
+    }
+    $sql = "SELECT sum(total) as total FROM (
+       SELECT DISTINCT f.contenthash, f.filesize as total FROM {files} f $tables $where) t";
+    $size = $DB->get_field_sql($sql);
+    return $size ? $size : 0;
 }
