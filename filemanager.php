@@ -176,15 +176,15 @@ if ($files->count) {
 
         $params = array();
         $params[] = $file->id;
-        $params[] = $file->filename;
-        $params[] = $file->userid ? $filteroptions->users[$file->userid] : $file->userid;
-        $params[] = $file->contextid ? $filteroptions->contexts[$file->contextid] : $file->contextid;
+        $params[] = rawurlencode($file->filename);
+        $params[] = $file->userid ? rawurlencode($filteroptions->users[$file->userid]) : $file->userid;
+        $params[] = $file->contextid ? rawurlencode($filteroptions->contexts[$file->contextid]) : $file->contextid;
         $params[] = $file->filearea;
         $params[] = $file->component;
         $params[] = $filesize;
         $params[] = $file->contenthash;
         $params[] = $file->pathnamehash;
-        $params[] = $file->filepath;
+        $params[] = rawurlencode($file->filepath);
         $params[] = $file->mimetype;
         $params[] = userdate($file->timemodified);
 
