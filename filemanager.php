@@ -32,7 +32,7 @@ $hash = optional_param('hash', null, PARAM_TEXT);
 $sort = optional_param('sort', 'filename', PARAM_TEXT);
 $dir = optional_param('dir', 'ASC', PARAM_TEXT);
 $page = optional_param('page', 0, PARAM_INT);
-$perpage = optional_param('perpage', 100, PARAM_INT);
+$perpage = optional_param('perpage', 50, PARAM_INT);
 
 if (!$context) {
     // Get context from URL (may not appear on the filter).
@@ -174,6 +174,10 @@ if ($files->count) {
         }
         $filesize = report_coursequotas_formatSize_text($file->filesize);
 
+        $deleteparams = array();
+        $deleteparams[] = $file->id;
+        $deleteparams[] = rawurlencode($file->filename);
+
         $params = array();
         $params[] = $file->id;
         $params[] = rawurlencode($file->filename);
@@ -189,7 +193,7 @@ if ($files->count) {
         $params[] = userdate($file->timemodified);
 
         $row = array();
-        $row[] = '<a href="#fileModal" data-toggle="modal" onclick="filemanager_openFileInfo(\''.implode("','", $params).'\')">'.$file->filename.'</a>';
+        $row[] = '<a href="#fileModal" data-toggle="modal" title="'.get_string('showmore', 'form').'" onclick="filemanager_openFileInfo(\''.implode("','", $params).'\')">'.$file->filename.' <i class="fa fa-search" aria-hidden="true"></i></a> <a href="#deleteModal" data-toggle="modal" onclick="filemanager_deleteFileDirect(\''.implode("','", $deleteparams).'\')" title="'.get_string('delete').'"><i class="fa fa-trash" aria-hidden="true"></i></a>';
         $row[] = $file->userid ? $ownercache[$file->userid] : $file->userid;
         $row[] = $file->contextid ? $contextcache[$file->contextid] : $file->contextid;
         $row[] = $file->filearea;

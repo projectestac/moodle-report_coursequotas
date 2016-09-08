@@ -47,7 +47,7 @@ $string['allcomponents'] = 'All components';
 $string['more_than'] = 'More than';
 $string['less_than'] = 'Less than';
 $string['showonlybackups'] = 'Show only backup files';
-$string['hidesamehash'] = 'Hide files with the same contenthash (Expert mode)';
+$string['hidesamehash'] = 'Hide files with the same <i>contenthash</i> (Expert mode)';
 $string['viewsimilarfiles'] = 'View similar files';
 $string['manage_backup_files'] = 'If you want to make free space, backups can be deleted from <a href="{$a}">this page</a>';
 
