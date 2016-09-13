@@ -98,9 +98,9 @@ echo $OUTPUT->box_start('', 'results');
 if ($files->count) {
 
     echo $OUTPUT->box_start('well');
-    $sizetotal = report_coursequotas_formatSize_text($files->total);
+    $sizetotal = report_coursequotas_format_size_text($files->total);
     echo $OUTPUT->box(get_string('totalfilesize', 'report_coursequotas', $sizetotal));
-    $filesize = report_coursequotas_formatSize_text($files->filesize);
+    $filesize = report_coursequotas_format_size_text($files->filesize);
     echo $OUTPUT->box(get_string('realfilesize', 'report_coursequotas', $filesize));
     echo $OUTPUT->box_end();
 
@@ -172,7 +172,7 @@ if ($files->count) {
             }
             $contextcache[$file->contextid] = '<a href="'. $filecontext->get_url() . '" target="_blank">' . $filteroptions->contexts[$file->contextid] . '</a>';
         }
-        $filesize = report_coursequotas_formatSize_text($file->filesize);
+        $filesize = report_coursequotas_format_size_text($file->filesize);
 
         $deleteparams = array();
         $deleteparams[] = $file->id;
