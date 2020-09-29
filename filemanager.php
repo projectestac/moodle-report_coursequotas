@@ -193,7 +193,7 @@ if ($files->count) {
         $params[] = userdate($file->timemodified);
 
         $row = array();
-        $row[] = '<a href="#fileModal" data-toggle="modal" title="'.get_string('showmore', 'form').'" onclick="filemanager_openFileInfo(\''.implode("','", $params).'\')">'.$file->filename.' <i class="fa fa-search" aria-hidden="true"></i></a> <a href="#deleteModal" data-toggle="modal" onclick="filemanager_deleteFileDirect(\''.implode("','", $deleteparams).'\')" title="'.get_string('delete').'"><i class="fa fa-trash" aria-hidden="true"></i></a>';
+        $row[] = '<a href="#fileModal" title="'.get_string('showmore', 'form').'" onclick="filemanager_openFileInfo(\''.implode("','", $params).'\')"  data-toggle="modal" data-target="#fileModal">'.$file->filename.' <i class="fa fa-search" aria-hidden="true"></i></a> <a href="#deleteModal" data-toggle="modal" onclick="filemanager_deleteFileDirect(\''.implode("','", $deleteparams).'\')" title="'.get_string('delete').'"><i class="fa fa-trash" aria-hidden="true"></i></a>';
         $row[] = $file->userid ? $ownercache[$file->userid] : $file->userid;
         $row[] = $file->contextid ? $contextcache[$file->contextid] : $file->contextid;
         $row[] = $file->filearea;
@@ -207,10 +207,13 @@ if ($files->count) {
     echo html_writer::table($table);
     echo $OUTPUT->box($pagingbar, 'text-right');
 
-    echo '  <div id="fileModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel" aria-hidden="true">
+    echo '  
+    <div id="fileModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3 id="fileModal_filename"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
               </div>
               <div class="modal-body">
                 <span id="fileModal_fileid" class="hidden"></span>
@@ -232,10 +235,14 @@ if ($files->count) {
                 <a href="#deleteModal" data-toggle="modal" class="btn btn-danger edit-btn" onclick="filemanager_deleteFile()"><i class="fa fa-trash" aria-hidden="true"></i>'.get_string('delete').'</a>
               </div>
             </div>
-            <div id="deleteModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        </div>
+    </div>
+    <div id="deleteModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3 id="deleteModal_filename"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
               </div>
               <div class="modal-body">
                 <p>'.get_string('confirmdeletefile', 'repository').'</p>
@@ -245,6 +252,8 @@ if ($files->count) {
                 <button class="btn btn-danger edit-btn" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i>'.get_string('cancel').'</button>
               </div>
             </div>
+        </div>
+    </div>
         <script src="'.$CFG->wwwroot.'/report/coursequotas/filemanager.js"></script>';
 } else {
     echo $OUTPUT->notification(get_string('nofilesfound', 'report_coursequotas'));
