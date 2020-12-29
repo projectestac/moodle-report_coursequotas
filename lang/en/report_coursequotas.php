@@ -54,4 +54,6 @@ $string['viewsimilarfiles'] = 'View similar files';
 $string['manage_backup_files'] = 'If you want to make free space, backups can be deleted from <a href="{$a}">this page</a>';
 $string['coursequotas:manage'] = 'Manage quota';
 
-
+$string['name_task_course_sizes'] = 'Calculate all course sizes and related info';
+$string['name_task_chart_info'] = 'Calculate chart info';
+$string['name_task_category_sizes'] = 'Calculate all category sizes and related info';

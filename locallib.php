@@ -1,11 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Coursequotas report library
  *
  * @package    report
  * @subpackage coursequotas
- * @copyright  2012 Agora Development Team (http://agora.xtec.cat)
+ * @copyright  TICxCAT <info@ticxcat.cat>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -70,64 +84,30 @@ function report_coursequotas_format_size_text($size) {
 }
 
 function report_course_quotas_get_chart_info() {
+    global $CFG;
+    require_once($CFG->dirroot.'/report/coursequotas/constants.php');
     $chartinfo = array();
 
     // Get quota used in courses.
-    $chartinfo['course'] = report_coursequotas_get_course_usage();
+    $chartinfo['course'] = report_coursequotas_format_size(intval(get_config(REPORT_COMPONENTNAME, 'course_usage')));
 
     // Get quota used in backups.
-    $chartinfo['backup'] = report_coursequotas_get_backup_usage();
+    $chartinfo['backup'] = report_coursequotas_format_size(intval(get_config(REPORT_COMPONENTNAME, 'backup_usage')));
 
     // Get quota used by users.
-    $chartinfo['user'] = report_coursequotas_get_user_usage();
+    $chartinfo['user'] = report_coursequotas_format_size(intval(get_config(REPORT_COMPONENTNAME, 'user_usage')));
 
     // Get quota used in H5P libraries.
-    $chartinfo['h5plib'] = report_coursequotas_get_h5plib_usage();
+    $chartinfo['h5plib'] = report_coursequotas_format_size(intval(get_config(REPORT_COMPONENTNAME, 'h5plib_usage')));
 
     // Get quota used in repositories.
-    $chartinfo['repository'] = report_coursequotas_get_repository_usage();
+    $chartinfo['repository'] = report_coursequotas_format_size(floatval(get_config(REPORT_COMPONENTNAME, 'repositories_usage')));
 
     // Get quota used in files in temp and trash directories.
-    $chartinfo['temp'] = report_coursequotas_get_temp_usage();
-    $chartinfo['trash'] = report_coursequotas_get_trash_usage();
+    $chartinfo['temp'] = report_coursequotas_format_size(floatval(get_config(REPORT_COMPONENTNAME, 'tempdir_usage')));
+    $chartinfo['trash'] = report_coursequotas_format_size(floatval(get_config(REPORT_COMPONENTNAME, 'trashdir_usage')));
 
     return $chartinfo;
-}
-
-/**
- * Get course usage information without backup usage.
- *
- * @author Pau Ferrer (pau@moodle.com)
- * @return object   Formatted size.
- */
-function report_coursequotas_get_course_usage() {
-    global $DB;
-
-    $syscontext = context_system::instance();
-    $sql = "SELECT id, path
-                  FROM {context}
-                 WHERE depth = ? AND contextlevel = ? AND path LIKE ?";
-    $params = array($syscontext->depth + 1, CONTEXT_COURSECAT, $syscontext->path.'/%');
-    $contexts = $DB->get_records_sql_menu($sql, $params);
-
-    $sitecourse = $DB->get_field('course', 'id', array('category' => 0));
-    $context = context_course::instance($sitecourse);
-    $contexts[$context->id] = $context->path;
-
-    $sqlparts = array();
-    foreach ($contexts as $contexid => $path) {
-        $sqlparts[] = "(f.contextid = c.id AND c.path like '$path/%')";
-    }
-    $sqlparts[] = 'f.contextid IN ('.implode(',', array_keys($contexts)).')';
-
-    $sql = implode(' OR ', $sqlparts);
-
-    // Exclude backup files.
-    $sql = "($sql) AND (f.component != 'backup' OR (f.filearea != 'activity' AND f.filearea != 'course' AND f.filearea != 'automated'))";
-
-    // Calculate size of all the files inside the course avoiding duplicates.
-    $size = get_coursequotas_filesize($sql, "{context} c");
-    return report_coursequotas_format_size($size);
 }
 
 /**
@@ -139,7 +119,8 @@ function report_coursequotas_get_course_usage() {
  * @return array Tree with data (see description)
  */
 function report_coursequotas_get_category_sizes() {
-    global $DB;
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/report/coursequotas/constants.php');
 
     // Step 1: build category tree.
     $catrecords = $DB->get_records('course_categories', array(), 'depth, id', 'id, name, parent, visible');
@@ -149,8 +130,9 @@ function report_coursequotas_get_category_sizes() {
     $cat = new StdClass();
     $cat->id = 0;
     $cat->name = get_string('front_page', 'report_coursequotas');
-    $coursecontext = context_course::instance($DB->get_field('course', 'id', array('category' => 0)));
-    $cat->categorysize = report_coursequotas_get_contextsize($coursecontext);
+    $courseid = $DB->get_field('course', 'id', array('category' => 0));
+    $size = $DB->get_field(COURSESIZE_TABLENAME, COURSESIZE_FIELDQUOTA, array(COURSESIZE_FIELDCOURSEID => intval($courseid)));
+    $cat->categorysize = intval($size);
     $cat->visible = 1;
     $cat->subcategories = false;
     $cattree[0] = $cat;
@@ -168,6 +150,9 @@ function report_coursequotas_get_category_sizes() {
  * @return array Tree with data (see description)
  */
 function report_coursequotas_build_category_tree(&$catrecords, $parent = 0) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/report/coursequotas/constants.php');
+
     $cattree = array();
 
     // Find categories with the same parent and add them.
@@ -177,9 +162,8 @@ function report_coursequotas_build_category_tree(&$catrecords, $parent = 0) {
             $cat->id = $catid;
             $cat->name = $record->name;
             $catcontext = context_coursecat::instance($catid);
-            $cat->categorysize = report_coursequotas_get_contextsize($catcontext);
+            $cat->categorysize = intval($DB->get_field(CATEGORYSIZE_TABLENAME, CATEGORYSIZE_FIELDQUOTA, array(CATEGORYSIZE_FIELDCATEGORYID => $catid)));
             $cat->visible = $record->visible;
-
             $cattree[$catid] = $cat;
 
             // Effiency improvement: Once the category is added to the tree, it won't be added again.
@@ -262,80 +246,8 @@ function can_manage_files() {
     return has_capability('report/coursequotas:manage', context_system::instance());
 }
 
-/**
- * Get all course sizes and related info.
- *
- * @author Pau Ferrer (pau@moodle.com)
- *
- * @return array of course info
- */
-function report_coursequotas_get_course_sizes() {
-    global $DB, $CFG;
-
-    $baseurl = $CFG->wwwroot.'/course/index.php?categoryid=';
-
-    $categories = $DB->get_records('course_categories', null, '', 'id, name, visible');
-    $courses = $DB->get_records('course', null, '', 'id, fullname, visible, category');
-    foreach ($courses as $courseid => $course) {
-        if ($course->category == 0) {
-            $course->catlink = get_string('front_page', 'report_coursequotas');
-        } else {
-            $cat = $categories[$course->category];
-            $dimmed = $cat->visible ? "" : ' class="dimmed"';
-            $course->catlink = '<a href="'.$baseurl.$cat->id.'" '.$dimmed.' target="_blank">'.$cat->name.'</a>';
-        }
-
-        // Calculate and add size.
-        $coursecontext = context_course::instance($courseid);
-        $coursesize = report_coursequotas_get_contextsize($coursecontext);
-        $size = report_coursequotas_format_size($coursesize);
-        $course->bytes = $size->bytes;
-        $course->sizeformat = $size->number.' '.$size->unit;
-    }
-
-    return $courses;
-}
-
-function cmp_sort_course_array($a, $b) {
-    return $a->bytes < $b->bytes;
-}
-
-/**
- * Gets the amount of bytes used in course and users backups.
- *
- * @author Toni Ginard (aginard@xtec.cat)
- * @global array $DB
- *
- * @return int Number of bytes used
- */
-function report_coursequotas_get_backup_usage() {
-    // Component equal to backup means "course level backup".
-    // filearea equal to backup means "user level backup" which is not associated to any course.
-    $size = get_coursequotas_filesize(get_backup_where_sql());
-    return report_coursequotas_format_size($size);
-}
-
-/**
- * Gets the amount of bytes used by H5P libraries.
- *
- * @author Toni Ginard (aginard@xtec.cat)
- * @global array $DB
- *
- * @return int Number of bytes used
- */
-function report_coursequotas_get_h5plib_usage() {
-    $size = get_coursequotas_filesize("(f.component = 'mod_hvp' AND f.filearea = 'libraries')");
-    return report_coursequotas_format_size($size);
-}
-
 function get_backup_where_sql() {
     return "((f.component = 'backup' AND (f.filearea = 'activity' OR f.filearea = 'course' OR f.filearea = 'automated')) OR (f.component = 'user' AND f.filearea = 'backup'))";
-}
-
-function report_coursequotas_get_user_usage() {
-    // User files excluding backups.
-    $size = get_coursequotas_filesize("component = 'user' AND filearea != 'backup'");
-    return report_coursequotas_format_size($size);
 }
 
 function report_coursequotas_get_directory_size($directory) {
@@ -344,34 +256,10 @@ function report_coursequotas_get_directory_size($directory) {
     if (file_exists($directory)) {
         $size = exec('du -sk ' . $directory);
         $size = explode('/', $size);
-        $size = $size[0] * 1024; // Size in kB to bytes.
+        $size = floatval($size[0]) * 1024; // Size in kB to bytes.
     }
 
     return $size;
-}
-
-function report_coursequotas_get_temp_usage() {
-    global $CFG;
-
-    $tempdir = isset($CFG->tempdir) ? $CFG->tempdir : $CFG->dataroot.'/temp';
-
-    $size = report_coursequotas_get_directory_size($tempdir);
-    return report_coursequotas_format_size($size);
-}
-
-function report_coursequotas_get_trash_usage() {
-    global $CFG;
-
-    $trashdir = isset($CFG->trashdir) ? $CFG->trashdir : $CFG->dataroot.'/trashdir';
-
-    $size = report_coursequotas_get_directory_size($trashdir);
-    return report_coursequotas_format_size($size);
-}
-
-function report_coursequotas_get_repository_usage() {
-    global $CFG;
-    $size = report_coursequotas_get_directory_size($CFG->dataroot . '/repository/');
-    return report_coursequotas_format_size($size);
 }
 
 function report_coursequotas_get_charinfo_total($chartinfo) {

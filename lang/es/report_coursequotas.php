@@ -53,3 +53,8 @@ $string['hidesamehash'] = 'No mostrar los archivos con el mismo <i>contenthash</
 $string['viewsimilarfiles'] = 'Ver archivos similares';
 $string['manage_backup_files'] = 'Para liberar espacio, se pueden eliminar las copias de seguridad de los cursos desde <a href="{$a}">este apartado</a>';
 $string['coursequotas:manage'] = 'Gestionar cuota';
+
+$string['name_task_course_sizes'] = 'Calcular la cuota de los cursos';
+$string['name_task_backup_usage'] = 'Calcular los bytes de backups de cursos y usuarios';
+$string['name_task_chart_info'] = 'Calcular la información del gráfico de espacio';
+$string['name_task_category_sizes'] = 'Calcular la cuota de las categorías';

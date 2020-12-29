@@ -14,26 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
-$capabilities = array(
-
-    'report/coursequotas:view' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW
-        ),
-
-        'clonepermissionsfrom' => 'moodle/site:viewreports',
+//See http://docs.moodle.org/dev/Event_2
+$observers = array(
+    array(
+        'eventname'   => '\core\event\course_deleted',
+        'callback'    => 'report_coursequotas_coursedeleted_handler',
+        'includefile' => '/report/coursequotas/lib/handlers.lib.php',
     ),
-    'report/coursequotas:manage' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW
-        ),
-
-        'clonepermissionsfrom' => 'moodle/site:viewreports',
+    array(
+        'eventname'   => '\core\event\course_category_deleted',
+        'callback'    => 'report_coursequotas_categorydeleted_handler',
+        'includefile' => '/report/coursequotas/lib/handlers.lib.php',
     )
 );

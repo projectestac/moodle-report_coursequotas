@@ -53,3 +53,8 @@ $string['hidesamehash'] = 'Amaga els fitxers amb el mateix <i>contenthash</i> (M
 $string['viewsimilarfiles'] = 'Mostra fitxers similars';
 $string['manage_backup_files'] = 'Si voleu alliberar espai podeu eliminar les còpies de seguretat dels cursos des d\'<a href="{$a}">aquest apartat</a>';
 $string['coursequotas:manage'] = 'Gestiona quota';
+
+$string['name_task_course_sizes'] = 'Calcula la quota dels cursos';
+$string['name_task_chart_info'] = 'Calcula la informació del gràfic d\'espai';
+$string['name_task_category_sizes'] = 'Calcula la quota de les categories';
+
