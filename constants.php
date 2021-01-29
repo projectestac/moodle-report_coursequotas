@@ -14,21 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
-define("REPORT_COURSEQUOTAS_LASTVERSION", 2021011400);
-define("REPORT_COURSEQUOTAS_VERSION_CREATETABLE", 2020123000);
-define("REPORT_CATEGORYQUOTAS_VERSION_CREATETABLE", 2021011200);
-define("REPORT_COMPONENTNAME", 'report_coursequotas');
-define("REPORT_COURSEQUOTAS_NAME", 'coursequotas');
-define("REPORT_COURSEQUOTAS_REPORTSTRING", 'report');
+define('REPORT_COURSEQUOTAS_VERSION', 2021020100);
+define('REPORT_COMPONENTNAME', 'report_coursequotas');
+define('REPORT_COURSEQUOTAS_NAME', 'coursequotas');
+define('REPORT_COURSEQUOTAS_REPORTSTRING', 'report');
 
-define("COURSESIZE_TABLENAME", 'rpt_coursequotas_coursesize');
-define("COURSESIZE_FIELDID", 'id');
-define("COURSESIZE_FIELDCOURSEID", 'courseid');
-define("COURSESIZE_FIELDQUOTA", 'quota');
-define("CATEGORYSIZE_TABLENAME", 'rpt_coursequotas_catsize');
-define("CATEGORYSIZE_FIELDID", 'id');
-define("CATEGORYSIZE_FIELDCATEGORYID", 'categoryid');
-define("CATEGORYSIZE_FIELDQUOTA", 'quota');
+define('COURSESIZE_TABLENAME', 'coursequotas_coursesize');
+define('COURSESIZE_FIELDID', 'id');
+define('COURSESIZE_FIELDCOURSEID', 'courseid');
+define('COURSESIZE_FIELDQUOTA', 'quota');
+define('CATEGORYSIZE_TABLENAME', 'coursequotas_catsize');
+define('CATEGORYSIZE_FIELDID', 'id');
+define('CATEGORYSIZE_FIELDCATEGORYID', 'categoryid');
+define('CATEGORYSIZE_FIELDQUOTA', 'quota');
 
-define("REPORT_COURSEQUOTAS_BYTES_STRING", 'bytes');
-define("REPORT_COURSEQUOTAS_ACTIONS_STRING", 'actions');
+define('REPORT_COURSEQUOTAS_BYTES_STRING', 'bytes');
+define('REPORT_COURSEQUOTAS_ACTIONS_STRING', 'actions');

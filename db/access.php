@@ -14,26 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
-$capabilities = array(
-
-    'report/coursequotas:view' => array(
+$capabilities = [
+    'report/coursequotas:view' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW
-        ),
-
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
         'clonepermissionsfrom' => 'moodle/site:viewreports',
-    ),
-    'report/coursequotas:manage' => array(
+    ],
+    'report/coursequotas:manage' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW
-        ),
-
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
         'clonepermissionsfrom' => 'moodle/site:viewreports',
-    )
-);
+    ]
+];

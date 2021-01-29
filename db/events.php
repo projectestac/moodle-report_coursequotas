@@ -15,15 +15,15 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 //See http://docs.moodle.org/dev/Event_2
-$observers = array(
-    array(
-        'eventname'   => '\core\event\course_deleted',
-        'callback'    => 'report_coursequotas_coursedeleted_handler',
+$observers = [
+    [
+        'eventname' => '\core\event\course_deleted',
+        'callback' => 'report_coursequotas_coursedeleted_handler',
         'includefile' => '/report/coursequotas/lib/handlers.lib.php',
-    ),
-    array(
-        'eventname'   => '\core\event\course_category_deleted',
-        'callback'    => 'report_coursequotas_categorydeleted_handler',
+    ],
+    [
+        'eventname' => '\core\event\course_category_deleted',
+        'callback' => 'report_coursequotas_categorydeleted_handler',
         'includefile' => '/report/coursequotas/lib/handlers.lib.php',
-    )
-);
+    ]
+];

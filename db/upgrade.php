@@ -14,61 +14,59 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
-include_once($CFG->dirroot.'/report/coursequotas/constants.php');
+global $CFG;
 
-function xmldb_report_coursequotas_upgrade($oldversion) {
-	global $DB, $OUTPUT;
+include_once($CFG->dirroot . '/report/coursequotas/constants.php');
+
+function xmldb_report_coursequotas_upgrade($oldversion): bool {
+
+    global $DB;
 
     $dbman = $DB->get_manager();
 
-    $result = TRUE;
-
-    $size_integer_10 = '10';
-    $size_integer_20 = '20';
-    $default_zero_value = '0';
-
     if ($oldversion < REPORT_COURSEQUOTAS_VERSION_CREATETABLE) {
-    	echo $OUTPUT->notification('Creating new table coursequotas...', 'notifysuccess');
 
-    	// Conditionally launch create table.
-        if (!$dbman->table_exists(COURSESIZE_TABLENAME)) {
-            // Creating table & Adding fields, keys and indexes.
-            $table = new \xmldb_table(COURSESIZE_TABLENAME);
-            $table->add_field(COURSESIZE_FIELDID, XMLDB_TYPE_INTEGER, $size_integer_10, null, true, true, null, null);
-            $table->add_field(COURSESIZE_FIELDCOURSEID, XMLDB_TYPE_INTEGER, $size_integer_20, null, true, false, $default_zero_value, COURSESIZE_FIELDID);
-            $table->add_field(COURSESIZE_FIELDQUOTA, XMLDB_TYPE_INTEGER, $size_integer_20, null, true, false, $default_zero_value, COURSESIZE_FIELDCOURSEID);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array(COURSESIZE_FIELDID));
-            $table->add_index('courseid_idx', XMLDB_INDEX_NOTUNIQUE, array(COURSESIZE_FIELDCOURSEID));
-            $dbman->create_table($table);          
+        // Define table coursequotas_coursesize to be created.
+        $table = new xmldb_table('coursequotas_coursesize');
+
+        // Adding fields to table coursequotas_coursesize.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('quota', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table coursequotas_coursesize.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table coursequotas_coursesize.
+        $table->add_index('courseid_idx', XMLDB_INDEX_UNIQUE, ['courseid']);
+
+        // Conditionally launch create table for coursequotas_coursesize.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
         }
 
-        // Savepoint reached.
-        upgrade_plugin_savepoint(true, REPORT_COURSEQUOTAS_VERSION_CREATETABLE, REPORT_COURSEQUOTAS_REPORTSTRING, REPORT_COURSEQUOTAS_NAME);
-    }
+        // Define table coursequotas_catsize to be created.
+        $table = new xmldb_table('coursequotas_catsize');
 
-    if ($oldversion < REPORT_CATEGORYQUOTAS_VERSION_CREATETABLE) {
-        echo $OUTPUT->notification('Creating new table categoryquotas...', 'notifysuccess');
+        // Adding fields to table coursequotas_catsize.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('categoryid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('quota', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
 
-        // Conditionally launch create table.
-        if (!$dbman->table_exists(CATEGORYSIZE_TABLENAME)) {
-            // Creating table & Adding fields, keys and indexes.
-            $table = new \xmldb_table(CATEGORYSIZE_TABLENAME);
-            $table->add_field(CATEGORYSIZE_FIELDID, XMLDB_TYPE_INTEGER, $size_integer_10, null, true, true, null, null);
-            $table->add_field(CATEGORYSIZE_FIELDCATEGORYID, XMLDB_TYPE_INTEGER, $size_integer_20, null, true, false, $default_zero_value, CATEGORYSIZE_FIELDID);
-            $table->add_field(CATEGORYSIZE_FIELDQUOTA, XMLDB_TYPE_INTEGER, $size_integer_20, null, true, false, $default_zero_value, CATEGORYSIZE_FIELDCATEGORYID);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array(CATEGORYSIZE_FIELDID));
-            $table->add_index('categoryid_idx', XMLDB_INDEX_NOTUNIQUE, array(CATEGORYSIZE_FIELDCATEGORYID));
-            $dbman->create_table($table);          
+        // Adding keys to table coursequotas_catsize.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table coursequotas_catsize.
+        $table->add_index('categoryid_idx', XMLDB_INDEX_UNIQUE, ['categoryid']);
+
+        // Conditionally launch create table for coursequotas_catsize.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
         }
 
-        // Savepoint reached.
-        upgrade_plugin_savepoint(true, REPORT_CATEGORYQUOTAS_VERSION_CREATETABLE, REPORT_COURSEQUOTAS_REPORTSTRING, REPORT_COURSEQUOTAS_NAME);
+        // Coursequotas savepoint reached.
+        upgrade_plugin_savepoint(true, REPORT_COURSEQUOTAS_VERSION_CREATETABLE, 'report', 'coursequotas');
     }
 
-    if ($oldversion < REPORT_COURSEQUOTAS_LASTVERSION) {
-        // Savepoint reached.
-        upgrade_plugin_savepoint(true, REPORT_COURSEQUOTAS_LASTVERSION, REPORT_COURSEQUOTAS_REPORTSTRING, REPORT_COURSEQUOTAS_NAME);
-    }
-
-    return $result;
+    return true;
 }

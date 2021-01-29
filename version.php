@@ -17,6 +17,6 @@
 global $CFG;
 include_once($CFG->dirroot.'/report/coursequotas/constants.php');
 
-$plugin->version  = REPORT_COURSEQUOTAS_LASTVERSION;
+$plugin->version  = REPORT_COURSEQUOTAS_VERSION;
 $plugin->requires = 2011120502.00;
 $plugin->component = REPORT_COMPONENTNAME;

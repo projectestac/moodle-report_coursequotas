@@ -17,9 +17,10 @@
 namespace report_coursequotas\output;
 
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->libdir . '/tablelib.php');
-require_once($CFG->dirroot.'/report/coursequotas/constants.php');
-require_once($CFG->dirroot.'/report/coursequotas/locallib.php');
+
+require_once $CFG->libdir . '/tablelib.php';
+require_once $CFG->dirroot . '/report/coursequotas/constants.php';
+require_once $CFG->dirroot . '/report/coursequotas/lib/local.lib.php';
 
 /**
  * Model Coursequotas Course Sizes table class.
@@ -28,20 +29,20 @@ require_once($CFG->dirroot.'/report/coursequotas/locallib.php');
  * @copyright  TICxCAT <info@ticxcat.cat>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class coursequotas_coursesize extends \table_sql {
+class coursequotas_coursesize extends \table_sql
+{
 
-	/**
-     * @var \report_coursequotas\canmanage
-     */
     protected $canmanage = null;
 
     /**
      * Sets up the table_log parameters.
      *
      * @param string $uniqueid unique id of form.
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
-    public function __construct($uniqueid='') {
-    	global $PAGE;
+    public function __construct($uniqueid = '') {
+        global $PAGE;
 
         parent::__construct($uniqueid);
 
@@ -51,13 +52,15 @@ class coursequotas_coursesize extends \table_sql {
 
         $columns = array(COURSESIZE_FIELDCOURSEID, 'categoryname', COURSESIZE_FIELDQUOTA);
         $headers = array(get_string('course_name', REPORT_COMPONENTNAME), get_string('category_name', REPORT_COMPONENTNAME), get_string('disk_used', REPORT_COMPONENTNAME));
+
         if ($this->canmanage) {
-        	$columns[] = REPORT_COURSEQUOTAS_ACTIONS_STRING;
-        	$headers[] = get_string(REPORT_COURSEQUOTAS_ACTIONS_STRING);
+            $columns[] = REPORT_COURSEQUOTAS_ACTIONS_STRING;
+            $headers[] = get_string(REPORT_COURSEQUOTAS_ACTIONS_STRING);
         }
+
         $this->define_columns($columns);
         $this->define_headers($headers);
-        
+
         $this->pageable(true);
         $this->collapsible(true);
         $this->sortable(true, COURSESIZE_FIELDQUOTA, SORT_DESC);
@@ -68,8 +71,8 @@ class coursequotas_coursesize extends \table_sql {
 
         $this->define_baseurl($PAGE->url);
 
-		$from = '{'.COURSESIZE_TABLENAME.'} as coursesize INNER JOIN {course} as c ON (c.id = coursesize.'.COURSESIZE_FIELDCOURSEID.')';
-		$this->set_sql('coursesize.'.COURSESIZE_FIELDCOURSEID.',c.visible,c.fullname,c.category,coursesize.'.COURSESIZE_FIELDQUOTA, $from, '1=1');
+        $from = '{' . COURSESIZE_TABLENAME . '} as coursesize INNER JOIN {course} as c ON (c.id = coursesize.' . COURSESIZE_FIELDCOURSEID . ')';
+        $this->set_sql('coursesize.' . COURSESIZE_FIELDCOURSEID . ',c.visible,c.fullname,c.category,coursesize.' . COURSESIZE_FIELDQUOTA, $from, '1=1');
     }
 
     /**
@@ -79,10 +82,12 @@ class coursequotas_coursesize extends \table_sql {
      * @return string HTML for the version column
      */
     public function col_courseid($courseinfo) {
-    	global $CFG;
-    	$coursebaseurl = $CFG->wwwroot.'/course/view.php?id=';
-    	$dimmed = $courseinfo->visible ? "" : ' class="dimmed"';
-    	return '<a'.' href="'.$coursebaseurl.$courseinfo->{COURSESIZE_FIELDCOURSEID}.'" '.$dimmed.' target="_blank">'.$courseinfo->fullname.'</a>';
+        global $CFG;
+
+        $coursebaseurl = $CFG->wwwroot . '/course/view.php?id=';
+        $dimmed = $courseinfo->visible ? '' : ' class="dimmed"';
+
+        return '<a' . ' href="' . $coursebaseurl . $courseinfo->{COURSESIZE_FIELDCOURSEID} . '" ' . $dimmed . ' target="_blank">' . $courseinfo->fullname . '</a>';
     }
 
     /**
@@ -90,17 +95,19 @@ class coursequotas_coursesize extends \table_sql {
      *
      * @param \stdClass $courseinfo courseinfo data.
      * @return string HTML for the version column
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function col_categoryname($courseinfo) {
-    	global $CFG, $DB;
+        global $CFG, $DB;
 
-    	if ($courseinfo->category == 0) {
+        if ($courseinfo->category == 0) {
             return get_string('front_page', REPORT_COMPONENTNAME);
         } else if ($category = $DB->get_record('course_categories', array('id' => $courseinfo->category), '*', IGNORE_MISSING)) {
-        	
-        	$baseurl = $CFG->wwwroot.'/course/index.php?categoryid=';
-        	$dimmed = $category->visible ? '' : ' class="dimmed"';
-        	return '<a href'.'="'.$baseurl.$category->id.'" '.$dimmed.' target="_blank">'.$category->name.'</a>';
+
+            $baseurl = $CFG->wwwroot . '/course/index.php?categoryid=';
+            $dimmed = $category->visible ? '' : ' class="dimmed"';
+            return '<a href' . '="' . $baseurl . $category->id . '" ' . $dimmed . ' target="_blank">' . $category->name . '</a>';
         }
 
         return '';
@@ -113,8 +120,9 @@ class coursequotas_coursesize extends \table_sql {
      * @return string HTML for the version column
      */
     public function col_quota($courseinfo) {
-    	$size = report_coursequotas_format_size($courseinfo->{COURSESIZE_FIELDQUOTA});
-        return $size->number.' '.$size->unit;
+        $size = report_coursequotas_format_size($courseinfo->{COURSESIZE_FIELDQUOTA});
+
+        return $size->number . ' ' . $size->unit;
     }
 
     /**
@@ -122,17 +130,18 @@ class coursequotas_coursesize extends \table_sql {
      *
      * @param \stdClass $courseinfo courseinfo data.
      * @return string HTML for the version column
+     * @throws \coding_exception
      */
     public function col_actions($courseinfo) {
-    	global $CFG;
+        global $CFG;
 
-    	$managestr = get_string('manage', REPORT_COMPONENTNAME);
-    	$managebaseurl = $CFG->wwwroot.'/report/coursequotas/filemanager.php?children=true&course=';
+        $managestr = get_string('manage', REPORT_COMPONENTNAME);
+        $managebaseurl = $CFG->wwwroot . '/report/coursequotas/filemanager.php?children=true&course=';
 
-    	if ($this->canmanage && $courseinfo->{COURSESIZE_FIELDQUOTA} > 0) {
-    		return '<a href="'.$managebaseurl.$courseinfo->{COURSESIZE_FIELDCOURSEID}.'">'.$managestr.'</a>';
-    	}
+        if ($this->canmanage && $courseinfo->{COURSESIZE_FIELDQUOTA} > 0) {
+            return '<a href="' . $managebaseurl . $courseinfo->{COURSESIZE_FIELDCOURSEID} . '">' . $managestr . '</a>';
+        }
 
-    	return '';
+        return '';
     }
 }

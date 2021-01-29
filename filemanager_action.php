@@ -19,7 +19,7 @@
  *
  * @package    report
  * @subpackage coursequotas
- * @copyright  TICxCAT <info@ticxcat.cat>
+ * @copyright  2016 Pau Ferrer Ocaña pau@moodle.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,8 +30,9 @@ require_login();
 $context = context_system::instance();
 require_capability('report/coursequotas:manage', $context);
 
-$action = optional_param('action', null, PARAM_ACTION);
+$action = optional_param('action', null, PARAM_ALPHANUMEXT);
 $fileid = optional_param('fileid', null, PARAM_INT);
+
 if (!$action || !$fileid) {
     die;
 }
@@ -47,13 +48,14 @@ switch ($action) {
         \core\session\manager::write_close(); // Unlock session during file serving.
         send_stored_file($file, null, $CFG->filteruploadedfiles, true);
         return;
+
     case 'delete':
         $file->delete();
         \core\notification::add(get_string('deleted'), 'success');
         if (!empty($_SERVER['HTTP_REFERER'])) {
             redirect($_SERVER['HTTP_REFERER']);
         } else {
-            redirect($CFG->wwwroot.'/report/coursequotas/filemanager.php');
+            redirect($CFG->wwwroot . '/report/coursequotas/filemanager.php');
         }
         return;
 }

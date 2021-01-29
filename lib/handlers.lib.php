@@ -14,26 +14,44 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
-function report_coursequotas_coursedeleted_handler($params) {
-	global $DB, $CFG;
-	include_once($CFG->dirroot.'/report/coursequotas/constants.php');
+/**
+ * Remove course from coursequotas_coursesize when the course is removed
+ *
+ * @param $params
+ * @return bool
+ * @throws dml_exception
+ */
+function report_coursequotas_coursedeleted_handler($params): bool {
+    global $DB, $CFG;
 
-	if (!isset($params->objectid) || empty($params->objectid)) {
+    include_once($CFG->dirroot . '/report/coursequotas/constants.php');
+
+    if (!isset($params->objectid) || empty($params->objectid)) {
         return false;
     }
 
     $courseid = intval($params->objectid);
-    return $DB->delete_records(COURSESIZE_TABLENAME, array(COURSESIZE_FIELDCOURSEID => $courseid));
+
+    return $DB->delete_records(COURSESIZE_TABLENAME, [COURSESIZE_FIELDCOURSEID => $courseid]);
 }
 
-function report_coursequotas_categorydeleted_handler($params) {
-	global $DB, $CFG;
-	include_once($CFG->dirroot.'/report/coursequotas/constants.php');
+/**
+ * Remove category from coursequotas_catsize when the category is removed
+ *
+ * @param $params
+ * @return bool
+ * @throws dml_exception
+ */
+function report_coursequotas_categorydeleted_handler($params): bool {
+    global $DB, $CFG;
 
-	if (!isset($params->objectid) || empty($params->objectid)) {
+    include_once($CFG->dirroot . '/report/coursequotas/constants.php');
+
+    if (!isset($params->objectid) || empty($params->objectid)) {
         return false;
     }
 
     $categoryid = intval($params->objectid);
-    return $DB->delete_records(CATEGORYSIZE_TABLENAME, array(CATEGORYSIZE_FIELDCATEGORYID => $categoryid));
+
+    return $DB->delete_records(CATEGORYSIZE_TABLENAME, [CATEGORYSIZE_FIELDCATEGORYID => $categoryid]);
 }
