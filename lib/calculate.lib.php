@@ -44,8 +44,8 @@ function report_coursequotas_get_contextsize(object $context, int $block_size): 
     $path = $context->path;
     $contextid = $context->id;
 
-    // Calculate size of all the files inside the course avoiding duplicates.
-    return get_coursequotas_filesize("(f.contextid = c.id AND c.path like '$path/%') OR f.contextid = $contextid", "{context} c", $block_size);
+    // Calculate size of all the files inside the context (course, category...) avoiding duplicates.
+    return get_coursequotas_filesize_join("c.path like '$path/%' OR f.contextid = $contextid", '{context} c', 'f.contextid = c.id', $block_size);
 }
 
 /**
@@ -73,3 +73,31 @@ function get_coursequotas_filesize(string $where = '', string $tables = '', $blo
     return $size ? $size : 0;
 }
 
+/**
+ * Get the sum of all filesize on a SQL from filesizes avoiding duplicates. This is the version
+ * using join, which is far more efficient (really important with huge tables)
+ *
+ * @param string $where
+ * @param string $join
+ * @param string $join_condition
+ * @param int $block_size
+ * @return int
+ * @throws dml_exception
+ */
+function get_coursequotas_filesize_join(string $where = '', string $join = '', string $join_condition = '', $block_size = 4096): int {
+    global $DB;
+
+    $where = 'WHERE ' . $where . ' AND filename != \'.\'';
+
+    $sql = "SELECT SUM($block_size * ((total + $block_size - 1) / $block_size)) AS total 
+            FROM (
+                SELECT DISTINCT f.contenthash, f.filesize AS total 
+                FROM {files} f
+                LEFT JOIN $join ON $join_condition
+                $where
+                ) t";
+
+    $size = $DB->get_field_sql($sql);
+
+    return $size ? : 0;
+}
