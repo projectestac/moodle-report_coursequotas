@@ -19,7 +19,7 @@
  *
  * @package    report
  * @subpackage coursequotas
- * @copyright  2012 Agora Development Team (https://github.com/projectestac/agora)
+ * @copyright  2021 Agora Development Team (https://github.com/projectestac/agora)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -74,22 +74,20 @@ foreach ($categories as $catid => $record) {
 // Update table with course information
 
 $courses = $DB->get_records('course', null, '', 'id');
+foreach ($courses as $course_id => $course) {
+    $course_context = \context_course::instance($course_id);
+    $course_size = report_coursequotas_get_contextsize($course_context, $block_size);
 
-foreach ($courses as $courseId => $course) {
-    $courseContext = \context_course::instance($courseId);
-    $courseSize = report_coursequotas_get_contextsize($courseContext, $block_size);
+    $data_object = $DB->get_record(COURSESIZE_TABLENAME, [COURSESIZE_FIELDCOURSEID => $course_id], '*', IGNORE_MULTIPLE);
 
-    // Update or insert record
-    $dataObject = $DB->get_record(COURSESIZE_TABLENAME, [COURSESIZE_FIELDCOURSEID => $courseId], '*', IGNORE_MULTIPLE);
-
-    if ($dataObject) {
-        $dataObject->{COURSESIZE_FIELDQUOTA} = $courseSize;
-        $DB->update_record(COURSESIZE_TABLENAME, $dataObject);
+    if ($data_object) { // Update or insert record
+        $data_object->{COURSESIZE_FIELDQUOTA} = $course_size;
+        $DB->update_record(COURSESIZE_TABLENAME, $data_object);
     } else {
-        $dataObject = new \stdClass();
-        $dataObject->{COURSESIZE_FIELDCOURSEID} = $courseId;
-        $dataObject->{COURSESIZE_FIELDQUOTA} = $courseSize;
-        $DB->insert_record(COURSESIZE_TABLENAME, $dataObject);
+        $data_object = new \stdClass();
+        $data_object->{COURSESIZE_FIELDCOURSEID} = $course_id;
+        $data_object->{COURSESIZE_FIELDQUOTA} = $course_size;
+        $DB->insert_record(COURSESIZE_TABLENAME, $data_object);
     }
 }
 
@@ -109,65 +107,64 @@ $sql = "SELECT id, path
 $contexts = $DB->get_records_sql_menu($sql, $params);
 
 $sitecourse = $DB->get_field('course', 'id', ['category' => 0]);
-$context = \context_course::instance($sitecourse);
-$contexts[$context->id] = $context->path;
+$context_course = \context_course::instance($sitecourse);
+$contexts[$context_course->id] = $context_course->path;
 
-$sqlparts = [];
+$sql_parts = [];
 foreach ($contexts as $contexid => $path) {
     $sqlparts[] = "(f.contextid = c.id AND c.path LIKE '$path/%')";
 }
-$sqlparts[] = 'f.contextid IN (' . implode(',', array_keys($contexts)) . ')';
+$sql_parts[] = 'f.contextid IN (' . implode(',', array_keys($contexts)) . ')';
 
-$sql = implode(' OR ', $sqlparts);
+$sql_where = implode(' OR ', $sql_parts);
 
-// Exclude backup files.
-$sql = "($sql) AND (f.component != 'backup' OR (f.filearea != 'activity' AND f.filearea != 'course' AND f.filearea != 'automated'))";
+$sql_where = "($sql_where) AND (f.component != 'backup' OR (f.filearea != 'activity' AND f.filearea != 'course' AND f.filearea != 'automated'))"; // Exclude backup files.
 
 $get_filesize = [
     [
-        'where' => $sql,
-        'tables' => '{context} c',
-        'config_name' => 'course_usage',
+        REPORT_COURSEQUOTAS_WHERE_STRING => $sql_where,
+        REPORT_COURSEQUOTAS_TABLES_STRING => '{context} c',
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'course_usage',
     ],
     [
-        'where' => "component = 'user' AND filearea != 'backup'",
-        'tables' => '',
-        'config_name' => 'user_usage',
+        REPORT_COURSEQUOTAS_WHERE_STRING => "component = 'user' AND filearea != 'backup'",
+        REPORT_COURSEQUOTAS_TABLES_STRING => '',
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'user_usage',
     ],
     [
-        'where' => "(f.component = 'mod_hvp' AND f.filearea = 'libraries') OR (f.component = 'core_h5p' AND f.filearea = 'libraries')",
-        'tables' => '',
-        'config_name' => 'h5plib_usage',
-    ],
+        REPORT_COURSEQUOTAS_WHERE_STRING => "(f.component = 'mod_hvp' AND f.filearea = 'libraries') OR (f.component = 'core_h5p' AND f.filearea = 'libraries')",
+        REPORT_COURSEQUOTAS_TABLES_STRING => '',
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'h5plib_usage',
+    ]
 ];
 
 foreach ($get_filesize as $item) {
     set_config(
-        $item['config_name'],
-        get_coursequotas_filesize($item['where'], $item['tables'], $block_size),
+        $item[REPORT_COURSEQUOTAS_CONFIGNAME_STRING],
+        get_coursequotas_filesize($item[REPORT_COURSEQUOTAS_WHERE_STRING], $item[REPORT_COURSEQUOTAS_TABLES_STRING], $block_size),
         REPORT_COMPONENTNAME
     );
 }
 
 $get_directory_size = [
     [
-        'directory' => $CFG->dataroot . '/repository/',
-        'config_name' => 'repositories_usage',
+        REPORT_COURSEQUOTAS_DIRECTORY_STRING => $CFG->dataroot . '/repository/',
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'repositories_usage',
     ],
     [
-        'directory' => $tempdir,
-        'config_name' => 'tempdir_usage',
+        REPORT_COURSEQUOTAS_DIRECTORY_STRING => $tempdir,
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'tempdir_usage',
     ],
     [
-        'directory' => $trashdir,
-        'config_name' => 'trashdir_usage',
-    ],
+        REPORT_COURSEQUOTAS_DIRECTORY_STRING => $trashdir,
+        REPORT_COURSEQUOTAS_CONFIGNAME_STRING => 'trashdir_usage',
+    ]
 ];
 
 foreach ($get_directory_size as $item) {
     set_config(
-        $item['config_name'],
-        report_coursequotas_get_directory_size($item['directory']),
+        $item[REPORT_COURSEQUOTAS_CONFIGNAME_STRING],
+        report_coursequotas_get_directory_size($item[REPORT_COURSEQUOTAS_DIRECTORY_STRING]),
         REPORT_COMPONENTNAME
     );
 }
