@@ -15,6 +15,7 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 define('REPORT_COURSEQUOTAS_VERSION', 2021062300);
+define('REPORT_COURSEQUOTAS_VERSION_CREATETABLE', 2021020100);
 define('REPORT_COMPONENTNAME', 'report_coursequotas');
 define('REPORT_COURSEQUOTAS_NAME', 'coursequotas');
 define('REPORT_COURSEQUOTAS_REPORTSTRING', 'report');
