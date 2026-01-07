@@ -276,8 +276,8 @@ if ($files->count) {
               </div>
             </div>
         </div>
-    </div>
-        <script src="' . $CFG->wwwroot . '/report/coursequotas/filemanager.js"></script>';
+    </div>';
+    $PAGE->requires->js_call_amd('report_coursequotas/filemanager', 'init');
 } else {
     echo $OUTPUT->notification(get_string('nofilesfound', REPORT_COMPONENTNAME));
 }
